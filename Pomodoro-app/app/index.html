@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agy Pomodoro — Flow into Deep Focus</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="mode-work">
+  <!-- Radial background glow that moves with theme state -->
+  <div class="background-radial-glow"></div>
+  
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <h1>Agy Pomodoro</h1>
+      </div>
+      <div class="header-actions">
+        <!-- Sound Toggle Button -->
+        <button id="toggle-mute" class="icon-button" aria-label="Toggle Mute" title="Toggle Sound">
+          <svg id="sound-on-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg id="sound-off-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+        <!-- Settings Trigger Button -->
+        <button id="toggle-settings" class="icon-button" aria-label="Open Settings" title="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Main Timer Interface Card -->
+      <section class="timer-card glass">
+        <!-- Mode selection tabs -->
+        <div class="mode-tabs">
+          <button id="mode-work" class="mode-tab active" data-mode="work">Pomodoro</button>
+          <button id="mode-short" class="mode-tab" data-mode="short">Short Break</button>
+          <button id="mode-long" class="mode-tab" data-mode="long">Long Break</button>
+        </div>
+
+        <!-- Timer Visual Display Area -->
+        <div class="timer-visual-container">
+          <div class="timer-ring-wrapper">
+            <!-- SVG Progress Ring -->
+            <svg class="timer-svg" width="340" height="340" viewBox="0 0 340 340">
+              <circle class="timer-ring-bg" cx="170" cy="170" r="150"></circle>
+              <circle class="timer-ring-progress" cx="170" cy="170" r="150"></circle>
+            </svg>
+            <!-- Text Content inside the ring -->
+            <div class="timer-display-content">
+              <span id="timer-label" class="timer-label">FOCUS</span>
+              <span id="timer-digits" class="timer-digits">25:00</span>
+              <span id="timer-sublabel" class="timer-sublabel">Flow state active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Control Actions -->
+        <div class="control-actions">
+          <button id="btn-reset" class="control-btn" aria-label="Reset Session" title="Reset Session">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+          </button>
+          <button id="btn-play-pause" class="control-btn play-btn" aria-label="Start Timer" title="Start Focus">
+            <!-- Play icon -->
+            <svg id="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <!-- Pause icon -->
+            <svg id="pause-icon" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          </button>
+          <button id="btn-skip" class="control-btn" aria-label="Skip Session" title="Skip Session">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 4 15 12 5 20 5 4"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19"></line>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Session Progress & Stats Tracker -->
+      <section class="session-tracker glass">
+        <div class="session-header">
+          <h3>Daily Focus Progress</h3>
+          <span id="session-count-text">0 / 4 completed</span>
+        </div>
+        <!-- Progress capsules represent completed sets before a Long Break -->
+        <div class="session-capsules-container" id="capsules-container">
+          <div class="capsule" data-index="0"></div>
+          <div class="capsule" data-index="1"></div>
+          <div class="capsule" data-index="2"></div>
+          <div class="capsule" data-index="3"></div>
+        </div>
+        <!-- Historical and Cumulative Stats -->
+        <div class="session-stats">
+          <div class="stat-item">
+            <span class="stat-value" id="stat-total-pomodoros">0</span>
+            <span class="stat-label">Total Pomodoros</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="stat-total-focus-time">0m</span>
+            <span class="stat-label">Total Focus Time</span>
+          </div>
+          <button id="btn-reset-stats" class="text-button" title="Wipe session stats">Reset Stats</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Slide-out Settings Drawer / Dialog -->
+    <aside id="settings-drawer" class="settings-drawer" aria-hidden="true">
+      <div id="drawer-overlay" class="drawer-overlay"></div>
+      <div class="drawer-content glass">
+        <div class="drawer-header">
+          <h2>Settings</h2>
+          <button id="close-settings" class="icon-button" aria-label="Close Settings">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <form id="settings-form" class="drawer-form" autocomplete="off">
+          <!-- Durations section -->
+          <div class="form-section">
+            <h3>Time Settings (Minutes)</h3>
+            <div class="input-grid">
+              <div class="input-group">
+                <label for="input-work">Work</label>
+                <input type="number" id="input-work" min="1" max="120" step="1" required>
+              </div>
+              <div class="input-group">
+                <label for="input-short">Short Break</label>
+                <input type="number" id="input-short" min="1" max="60" step="1" required>
+              </div>
+              <div class="input-group">
+                <label for="input-long">Long Break</label>
+                <input type="number" id="input-long" min="1" max="60" step="1" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Automations section -->
+          <div class="form-section">
+            <h3>Automations</h3>
+            <div class="toggle-group">
+              <div class="toggle-label-container">
+                <span class="toggle-title">Auto-start Breaks</span>
+                <span class="toggle-desc">Automatically start breaks when a Work session ends.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggle-auto-breaks">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-group">
+              <div class="toggle-label-container">
+                <span class="toggle-title">Auto-start Pomodoros</span>
+                <span class="toggle-desc">Automatically start Pomodoros when a break ends.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggle-auto-pomodoros">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Audio Test Section -->
+          <div class="form-section sound-test-section">
+            <h3>Sound Preference</h3>
+            <div class="sound-test-container">
+              <span>Test Bell Audio</span>
+              <button type="button" id="btn-test-sound" class="btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+                <span>Play Preview</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Drawer control buttons -->
+          <div class="form-actions">
+            <button type="button" id="btn-restore-defaults" class="btn-text">Restore Defaults</button>
+            <button type="submit" id="btn-save-settings" class="btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+
+    <footer class="app-footer">
+      <p>Stay mindful, stay productive.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
