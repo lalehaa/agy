@@ -1,5 +1,16 @@
 # Project Rules & Standards
 
+
+
+## Environment Isolation & Dependency Management
+- **CRITICAL**: You are strictly forbidden from installing global python packages or using the `--break-system-packages` flag.
+- **Enforcement Rule**: Do not simply write instructions telling the user to create or activate an environment. You must actively execute the bash terminal tools yourself to provision the environment.
+- **Execution Checklist**:
+  1. Check if `.venv` exists in the application subfolder. If missing, immediately execute `python3 -m venv .venv` using your terminal tool.
+  2. Always prefix any python-based execution or installation command with the activation snippet: `source .venv/bin/activate && ...`
+  3. Ensure all packages (`uvicorn`, `fastapi`, etc.) are fully installed into this local virtual environment before finalizing the workflow step.
+
+
 ## Code Style & Guardrails
 - **Language**: All backend logic must be written in strict, typed Python 3.11+.
 - **Formatting**: Always run `black` formatting on files before declaring a task complete.
