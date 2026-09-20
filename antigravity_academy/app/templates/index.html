@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Academy - Developer Training & Playground</title>
+    <!-- Tailwind CSS -->
+    <script src="/static/vendor/tailwind.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- App Logic & Alpine.js -->
+    <script src="/static/app.js"></script>
+    <script defer src="/static/vendor/alpine.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="h-full font-sans antialiased bg-slate-950 text-slate-100 flex flex-col" x-data="academyApp">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-atom"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Antigravity Academy</h1>
+                    <p class="text-xs text-slate-400">Developer Setup & Mastery Hub</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-1 sm:space-x-2">
+                <button @click="activeTab = 'curriculum'" :class="activeTab === 'curriculum' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span class="hidden md:inline">Guided Labs</span>
+                </button>
+                <button @click="activeTab = 'generator'" :class="activeTab === 'generator' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="hidden md:inline">Config Generator</span>
+                </button>
+                <button @click="activeTab = 'validator'" :class="activeTab === 'validator' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-vial-circle-check"></i>
+                    <span class="hidden md:inline">Live Validator</span>
+                </button>
+                <button @click="activeTab = 'cheatsheet'" :class="activeTab === 'cheatsheet' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                    <span class="hidden md:inline">Cheat Sheet</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+
+        <!-- TAB 1: CURRICULUM & GUIDED LABS -->
+        <div x-show="activeTab === 'curriculum'" x-cloak class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Modules Sidebar -->
+            <div class="lg:col-span-4 bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex flex-col space-y-3">
+                <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider px-2">Learning Modules</h2>
+                <div class="space-y-2 overflow-y-auto max-h-[calc(100vh-220px)] pr-1">
+                    <template x-for="mod in modules" :key="mod.id">
+                        <button @click="activeModule = mod" 
+                            :class="activeModule && activeModule.id === mod.id ? 'bg-slate-800 border-cyan-500/50 shadow-md' : 'bg-slate-900/40 border-slate-800/80 hover:bg-slate-800/50'" 
+                            class="w-full text-left p-3.5 rounded-lg border transition flex flex-col space-y-2 group">
+                            <div class="flex items-center justify-between">
+                                <span class="font-medium text-sm text-slate-200 group-hover:text-cyan-400 transition flex items-center space-x-2">
+                                    <i :class="'fa-solid ' + mod.icon + ' text-cyan-400 text-xs'"></i>
+                                    <span x-text="mod.title"></span>
+                                </span>
+                                <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700" x-text="mod.estimated_time"></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="flex-1 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-300" :style="'width: ' + getModuleProgressPercent(mod) + '%'"></div>
+                                </div>
+                                <span class="text-xs text-slate-400 font-mono" x-text="getModuleProgressPercent(mod) + '%'"></span>
+                            </div>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Right Active Lab Panel -->
+            <div class="lg:col-span-8 bg-slate-900/60 border border-slate-800 rounded-xl p-6 flex flex-col space-y-6 overflow-y-auto max-h-[calc(100vh-180px)]">
+                <template x-if="activeModule">
+                    <div class="space-y-6">
+                        <div class="border-b border-slate-800 pb-4">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <i :class="'fa-solid ' + activeModule.icon + ' text-cyan-400 text-2xl'"></i>
+                                <h2 class="text-2xl font-bold text-slate-100" x-text="activeModule.title"></h2>
+                            </div>
+                            <p class="text-slate-400 text-sm" x-text="activeModule.description"></p>
+                        </div>
+
+                        <!-- Labs List -->
+                        <div class="space-y-6">
+                            <template x-for="lab in activeModule.labs" :key="lab.id">
+                                <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4 hover:border-slate-700 transition">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <h3 class="font-semibold text-slate-200 text-lg flex items-center space-x-2">
+                                                <span x-text="lab.title"></span>
+                                            </h3>
+                                            <p class="text-slate-400 text-sm mt-1" x-text="lab.instruction"></p>
+                                        </div>
+                                        <button @click="toggleLab(activeModule.id, lab.id)" 
+                                            :class="isLabCompleted(activeModule.id, lab.id) ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'" 
+                                            class="px-3 py-1.5 rounded-md border text-xs font-semibold flex items-center space-x-1.5 transition whitespace-nowrap">
+                                            <i :class="isLabCompleted(activeModule.id, lab.id) ? 'fa-solid fa-check-circle text-emerald-400' : 'fa-regular fa-circle'"></i>
+                                            <span x-text="isLabCompleted(activeModule.id, lab.id) ? 'Completed' : 'Mark Done'"></span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Code Box -->
+                                    <div class="relative bg-slate-950 rounded-lg border border-slate-800/80 p-4 font-mono text-sm overflow-x-auto text-slate-300">
+                                        <button @click="copyToClipboard(lab.code_template)" class="absolute top-3 right-3 text-slate-400 hover:text-cyan-400 transition text-xs flex items-center space-x-1 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                                            <i class="fa-regular fa-copy"></i>
+                                            <span>Copy</span>
+                                        </button>
+                                        <pre x-text="lab.code_template" class="pr-16"></pre>
+                                    </div>
+
+                                    <!-- Explanation Note -->
+                                    <div class="bg-cyan-950/20 border border-cyan-500/20 rounded-md p-3 text-xs text-cyan-300 flex items-start space-x-2">
+                                        <i class="fa-solid fa-lightbulb text-cyan-400 mt-0.5"></i>
+                                        <span x-text="lab.explanation"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- TAB 2: CONFIG GENERATOR -->
+        <div x-show="activeTab === 'generator'" x-cloak class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Form Inputs Panel -->
+            <div class="lg:col-span-6 bg-slate-900/60 border border-slate-800 rounded-xl p-6 flex flex-col space-y-6 overflow-y-auto max-h-[calc(100vh-180px)]">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100 mb-1">Interactive Config Builder</h2>
+                    <p class="text-slate-400 text-xs">Visually configure Antigravity agent teams, custom skills, and MCP server manifests.</p>
+                </div>
+
+                <!-- Config Type Selector -->
+                <div class="grid grid-cols-3 gap-2 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs font-semibold">
+                    <button @click="genType = 'agents'; generateConfig()" :class="genType === 'agents' ? 'bg-cyan-500 text-slate-950 shadow' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-md transition text-center">
+                        AGENTS.md
+                    </button>
+                    <button @click="genType = 'skill'; generateConfig()" :class="genType === 'skill' ? 'bg-cyan-500 text-slate-950 shadow' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-md transition text-center">
+                        SKILL.md
+                    </button>
+                    <button @click="genType = 'mcp'; generateConfig()" :class="genType === 'mcp' ? 'bg-cyan-500 text-slate-950 shadow' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-md transition text-center">
+                        mcp.json
+                    </button>
+                </div>
+
+                <!-- AGENTS.MD FORM -->
+                <div x-show="genType === 'agents'" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Product Manager Role (@pm)</label>
+                        <textarea x-model="agentsForm.pm_role" @input="generateConfig()" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Software Engineer Role (@coder)</label>
+                        <textarea x-model="agentsForm.coder_role" @input="generateConfig()" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Quality Assurance Role (@qa)</label>
+                        <textarea x-model="agentsForm.qa_role" @input="generateConfig()" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Custom Workspace Rules</label>
+                        <div class="space-y-2 mb-2">
+                            <template x-for="(rule, idx) in agentsForm.custom_rules" :key="idx">
+                                <div class="flex items-center justify-between bg-slate-950 px-3 py-1.5 rounded border border-slate-800 text-xs">
+                                    <span x-text="rule" class="text-slate-300"></span>
+                                    <button @click="removeCustomRule(idx)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="flex space-x-2">
+                            <input x-model="newRuleText" @keydown.enter.prevent="addCustomRule()" placeholder="Add a rule (e.g. Always format with black)" class="flex-1 bg-slate-950 border border-slate-800 rounded-md p-2 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                            <button @click="addCustomRule()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-md border border-slate-700">Add</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SKILL.MD FORM -->
+                <div x-show="genType === 'skill'" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Skill Identifier Name</label>
+                        <input x-model="skillForm.name" @input="generateConfig()" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Description</label>
+                        <input x-model="skillForm.description" @input="generateConfig()" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Skill Markdown Instructions</label>
+                        <textarea x-model="skillForm.instructions" @input="generateConfig()" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 font-mono focus:border-cyan-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- MCP.JSON FORM -->
+                <div x-show="genType === 'mcp'" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">MCP Server Identifier</label>
+                        <input x-model="mcpForm.server_name" @input="generateConfig()" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Executable Command</label>
+                        <input x-model="mcpForm.command" @input="generateConfig()" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Environment Variables</label>
+                        <div class="space-y-2 mb-2">
+                            <template x-for="(env, idx) in mcpForm.env_vars" :key="idx">
+                                <div class="flex items-center justify-between bg-slate-950 px-3 py-1.5 rounded border border-slate-800 text-xs">
+                                    <span class="font-mono text-cyan-400" x-text="env.key"></span>
+                                    <span class="text-slate-400 font-mono" x-text="env.value"></span>
+                                    <button @click="removeMcpEnv(idx)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="flex space-x-2">
+                            <input x-model="newEnvKey" placeholder="KEY" class="w-1/3 bg-slate-950 border border-slate-800 rounded-md p-2 text-xs text-slate-200">
+                            <input x-model="newEnvVal" placeholder="VALUE" class="w-1/2 bg-slate-950 border border-slate-800 rounded-md p-2 text-xs text-slate-200">
+                            <button @click="addMcpEnv()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-md border border-slate-700">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview & Actions Panel -->
+            <div class="lg:col-span-6 bg-slate-900/60 border border-slate-800 rounded-xl p-6 flex flex-col space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Generated File Preview</h3>
+                        <span class="text-xs font-mono text-cyan-400" x-text="generatedResult.filename"></span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button @click="copyToClipboard(generatedResult.content)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-md border border-slate-700 flex items-center space-x-1">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Copy</span>
+                        </button>
+                        <button @click="downloadConfig()" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs rounded-md shadow flex items-center space-x-1">
+                            <i class="fa-solid fa-download"></i>
+                            <span>Download</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 bg-slate-950 border border-slate-800/80 rounded-lg p-4 font-mono text-xs text-slate-200 overflow-auto max-h-[calc(100vh-280px)]">
+                    <pre x-text="generatedResult.content"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: LIVE VALIDATOR -->
+        <div x-show="activeTab === 'validator'" x-cloak class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800 rounded-xl p-6 flex flex-col space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-100">Live Configuration Validator</h2>
+                        <p class="text-xs text-slate-400">Paste your configuration markdown or JSON to inspect syntax and compliance.</p>
+                    </div>
+                    <select x-model="valType" class="bg-slate-950 border border-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-200 focus:outline-none">
+                        <option value="agents">AGENTS.md</option>
+                        <option value="skill">SKILL.md</option>
+                        <option value="mcp">mcp.json</option>
+                    </select>
+                </div>
+
+                <textarea x-model="valContent" rows="16" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs text-slate-200 focus:border-cyan-500 focus:outline-none" placeholder="Paste file contents here..."></textarea>
+
+                <button @click="validateContent()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-lg shadow transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Run Syntax & Compliance Check</span>
+                </button>
+            </div>
+
+            <!-- Validation Results Sidebar -->
+            <div class="lg:col-span-5 bg-slate-900/60 border border-slate-800 rounded-xl p-6 flex flex-col space-y-4">
+                <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Validation Output</h3>
+
+                <template x-if="!valResult">
+                    <div class="flex-1 flex flex-col items-center justify-center text-slate-500 py-12 space-y-2">
+                        <i class="fa-solid fa-clipboard-check text-4xl"></i>
+                        <p class="text-xs">Click 'Run Syntax & Compliance Check' to inspect output.</p>
+                    </div>
+                </template>
+
+                <template x-if="valResult">
+                    <div class="space-y-4">
+                        <!-- Status Badge -->
+                        <div :class="valResult.valid ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'" class="p-4 rounded-lg border flex items-center space-x-3">
+                            <i :class="valResult.valid ? 'fa-solid fa-circle-check text-2xl' : 'fa-solid fa-triangle-exclamation text-2xl'"></i>
+                            <div>
+                                <h4 class="font-bold text-sm" x-text="valResult.valid ? 'Configuration Valid' : 'Validation Errors Found'"></h4>
+                                <p class="text-xs opacity-80" x-text="valResult.valid ? 'All required syntax and structure rules passed.' : 'Correct the errors listed below.'"></p>
+                            </div>
+                        </div>
+
+                        <!-- Errors -->
+                        <template x-if="valResult.errors && valResult.errors.length > 0">
+                            <div class="space-y-2">
+                                <h4 class="text-xs font-semibold text-rose-400 uppercase tracking-wider flex items-center space-x-1">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                    <span>Errors</span>
+                                </h4>
+                                <div class="space-y-1.5">
+                                    <template x-for="err in valResult.errors" :key="err">
+                                        <div class="bg-rose-950/20 border border-rose-500/20 rounded p-2.5 text-xs text-rose-300 font-mono" x-text="err"></div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Warnings -->
+                        <template x-if="valResult.warnings && valResult.warnings.length > 0">
+                            <div class="space-y-2">
+                                <h4 class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center space-x-1">
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                    <span>Warnings / Recommendations</span>
+                                </h4>
+                                <div class="space-y-1.5">
+                                    <template x-for="warn in valResult.warnings" :key="warn">
+                                        <div class="bg-amber-950/20 border border-amber-500/20 rounded p-2.5 text-xs text-amber-300 font-mono" x-text="warn"></div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- TAB 4: CHEAT SHEET -->
+        <div x-show="activeTab === 'cheatsheet'" x-cloak class="flex-1 bg-slate-900/60 border border-slate-800 rounded-xl p-6 overflow-y-auto max-h-[calc(100vh-180px)] space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-100">Antigravity Developer Cheat Sheet</h2>
+                <p class="text-sm text-slate-400">Quick reference for commands, keybindings, files, and architecture rules.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Slash Commands -->
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-3">
+                    <h3 class="font-bold text-cyan-400 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-terminal"></i>
+                        <span>Slash Commands</span>
+                    </h3>
+                    <div class="space-y-2 text-xs font-mono">
+                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800"><span class="text-cyan-400 font-bold">/grill-me</span> - Interview agent to walk down design tree before code</div>
+                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800"><span class="text-cyan-400 font-bold">/goal</span> - Instruct agent to run relentlessly until goal completion</div>
+                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800"><span class="text-cyan-400 font-bold">/schedule</span> - Set up cron tasks or background timers</div>
+                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800"><span class="text-cyan-400 font-bold">/learn</span> - Persist user corrections and workspace patterns</div>
+                    </div>
+                </div>
+
+                <!-- Subagents & Tools -->
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-3">
+                    <h3 class="font-bold text-cyan-400 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-sitemap"></i>
+                        <span>Subagent Orchestration</span>
+                    </h3>
+                    <div class="space-y-2 text-xs font-mono">
+                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800"><span class="text-cyan-400 font-bold">invoke_subagent</span> - Spawn parallel subagents with roles</div>
+                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800"><span class="text-cyan-400 font-bold">send_message</span> - Peer messaging via subagent conversation ID</div>
+                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800"><span class="text-cyan-400 font-bold">manage_subagents</span> - List active subagents or terminate trees</div>
+                    </div>
+                </div>
+
+                <!-- Project Architecture Rules -->
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-3">
+                    <h3 class="font-bold text-cyan-400 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-folder-tree"></i>
+                        <span>Workspace Architecture Rules</span>
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                        <li>New apps belong in dedicated root subfolders inside workspace.</li>
+                        <li>Technical specs and docs reside inside the app folder.</li>
+                        <li>Virtual environments (`.venv`) belong in the app subfolder.</li>
+                        <li>Prefix commands with `source .venv/bin/activate && ...`.</li>
+                    </ul>
+                </div>
+
+                <!-- Sandbox Rules -->
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-3">
+                    <h3 class="font-bold text-cyan-400 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Terminal Sandbox Policy</span>
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                        <li>Standard mode (`BypassSandbox: false`): Isolated, safe auto-runs.</li>
+                        <li>Bypass mode (`BypassSandbox: true`): Host/network access.</li>
+                        <li>Minimize unsandboxed steps; isolate single commands needing bypass.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div x-show="showToast" x-cloak x-transition class="fixed bottom-6 right-6 bg-cyan-500 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg shadow-xl flex items-center space-x-2 z-50">
+        <i class="fa-solid fa-circle-info"></i>
+        <span x-text="toastMessage"></span>
+    </div>
+
+</body>
+</html>
+
