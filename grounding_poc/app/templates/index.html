@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertex AI & Gemini Grounding PoC</title>
+    <!-- Local Bundled Tailwind CSS -->
+    <script src="/static/vendor/tailwind.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- App Logic & Alpine.js -->
+    <script src="/static/app.js"></script>
+    <script defer src="/static/vendor/alpine.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="h-full font-sans antialiased bg-slate-950 text-slate-100 flex flex-col" x-data="groundingApp">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Vertex AI Grounding PoC</h1>
+                    <p class="text-xs text-slate-400">Enterprise Web Grounding • Google Search • Vertex AI Search</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <nav class="flex space-x-1 sm:space-x-2">
+                <button @click="activeTab = 'compare'" :class="activeTab === 'compare' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-columns"></i>
+                    <span class="hidden md:inline">Side-by-Side Matrix</span>
+                </button>
+                <button @click="activeTab = 'single'" :class="activeTab === 'single' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    <span class="hidden md:inline">Single Inspector</span>
+                </button>
+                <button @click="activeTab = 'config'" :class="activeTab === 'config' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-gear"></i>
+                    <span class="hidden md:inline">GCP Config</span>
+                </button>
+                <button @click="activeTab = 'architecture'" :class="activeTab === 'architecture' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span class="hidden md:inline">Architecture</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col space-y-6">
+
+        <!-- Top Prompt Input & Controls Bar -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-xl flex flex-col space-y-4">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+                <div class="flex-1 relative">
+                    <input x-model="promptInput" @keydown.enter.prevent="runComparison()" placeholder="Enter your prompt to test grounding..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-4 pr-10 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition">
+                    <button @click="promptInput = ''" class="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <select x-model="selectedModel" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-3 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                        <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                    </select>
+
+                    <button @click="activeTab === 'compare' ? runComparison() : runSingleMode()" :disabled="isLoading" class="px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm rounded-lg shadow-lg shadow-cyan-500/20 transition flex items-center space-x-2 disabled:opacity-50">
+                        <i x-show="!isLoading" class="fa-solid fa-play"></i>
+                        <i x-show="isLoading" class="fa-solid fa-circle-notch fa-spin"></i>
+                        <span x-text="isLoading ? 'Benchmarking...' : 'Run Grounding'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: SIDE-BY-SIDE MATRIX -->
+        <div x-show="activeTab === 'compare'" x-cloak class="flex-1 space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100">Side-by-Side Grounding Comparison Matrix</h2>
+                    <p class="text-xs text-slate-400">Comparing responses, search queries, and citation sources across all 3 grounding modes.</p>
+                </div>
+                <div class="text-xs text-slate-500 flex items-center space-x-3">
+                    <span class="flex items-center space-x-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span><span>Web Enterprise</span></span>
+                    <span class="flex items-center space-x-1"><span class="w-2 h-2 rounded-full bg-blue-400"></span><span>Google Search</span></span>
+                    <span class="flex items-center space-x-1"><span class="w-2 h-2 rounded-full bg-indigo-400"></span><span>Vertex Search</span></span>
+                </div>
+            </div>
+
+            <template x-if="comparisonData && comparisonData.results">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- MODE 1: WEB GROUNDING ENTERPRISE -->
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col space-y-4 hover:border-cyan-500/40 transition">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+                                    <i class="fa-solid fa-building-shield"></i>
+                                </span>
+                                <div>
+                                    <h3 class="font-bold text-sm text-slate-200">1. Web Grounding Enterprise</h3>
+                                    <span class="text-[10px] text-slate-400" x-text="'Latency: ' + comparisonData.results.web_enterprise.latency_ms + 'ms'"></span>
+                                </div>
+                            </div>
+                            <span :class="comparisonData.results.web_enterprise.is_mock ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'" class="px-2 py-0.5 rounded text-[10px] border font-mono" x-text="comparisonData.results.web_enterprise.is_mock ? 'Mock Mode' : 'Live GCP'"></span>
+                        </div>
+
+                        <!-- Response Text -->
+                        <div class="flex-1 bg-slate-950 p-4 rounded-lg border border-slate-800/80 text-xs text-slate-200 leading-relaxed overflow-y-auto max-h-60 whitespace-pre-line" x-text="comparisonData.results.web_enterprise.response_text"></div>
+
+                        <!-- Web Search Queries -->
+                        <div class="space-y-1.5">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Executed Search Queries</span>
+                            <div class="space-y-1">
+                                <template x-for="q in comparisonData.results.web_enterprise.metadata.web_search_queries" :key="q">
+                                    <div class="bg-slate-950 px-2.5 py-1 rounded text-[11px] font-mono text-cyan-300 border border-slate-800 flex items-center space-x-1.5">
+                                        <i class="fa-solid fa-magnifying-glass text-[9px] text-cyan-400"></i>
+                                        <span x-text="q"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Citations -->
+                        <div class="space-y-1.5">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Grounded Sources</span>
+                            <div class="space-y-2">
+                                <template x-for="c in comparisonData.results.web_enterprise.metadata.citations" :key="c.url">
+                                    <a :href="c.url" target="_blank" class="block bg-slate-950 hover:bg-slate-800/60 p-2.5 rounded border border-slate-800 transition group">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-slate-200 group-hover:text-cyan-400 truncate" x-text="c.title"></span>
+                                            <span class="text-[10px] text-cyan-400 font-mono" x-text="Math.round((c.confidence_score || 0.95)*100) + '%'"></span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 line-clamp-2" x-text="c.snippet"></p>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODE 2: GROUNDING WITH GOOGLE SEARCH -->
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col space-y-4 hover:border-blue-500/40 transition">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/30">
+                                    <i class="fa-brands fa-google"></i>
+                                </span>
+                                <div>
+                                    <h3 class="font-bold text-sm text-slate-200">2. Grounding with Google Search</h3>
+                                    <span class="text-[10px] text-slate-400" x-text="'Latency: ' + comparisonData.results.google_search.latency_ms + 'ms'"></span>
+                                </div>
+                            </div>
+                            <span :class="comparisonData.results.google_search.is_mock ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'" class="px-2 py-0.5 rounded text-[10px] border font-mono" x-text="comparisonData.results.google_search.is_mock ? 'Mock Mode' : 'Live GCP'"></span>
+                        </div>
+
+                        <!-- Response Text -->
+                        <div class="flex-1 bg-slate-950 p-4 rounded-lg border border-slate-800/80 text-xs text-slate-200 leading-relaxed overflow-y-auto max-h-60 whitespace-pre-line" x-text="comparisonData.results.google_search.response_text"></div>
+
+                        <!-- Web Search Queries -->
+                        <div class="space-y-1.5">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Executed Search Queries</span>
+                            <div class="space-y-1">
+                                <template x-for="q in comparisonData.results.google_search.metadata.web_search_queries" :key="q">
+                                    <div class="bg-slate-950 px-2.5 py-1 rounded text-[11px] font-mono text-blue-300 border border-slate-800 flex items-center space-x-1.5">
+                                        <i class="fa-solid fa-magnifying-glass text-[9px] text-blue-400"></i>
+                                        <span x-text="q"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Citations -->
+                        <div class="space-y-1.5">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Grounded Sources</span>
+                            <div class="space-y-2">
+                                <template x-for="c in comparisonData.results.google_search.metadata.citations" :key="c.url">
+                                    <a :href="c.url" target="_blank" class="block bg-slate-950 hover:bg-slate-800/60 p-2.5 rounded border border-slate-800 transition group">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-slate-200 group-hover:text-blue-400 truncate" x-text="c.title"></span>
+                                            <span class="text-[10px] text-blue-400 font-mono" x-text="Math.round((c.confidence_score || 0.90)*100) + '%'"></span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 line-clamp-2" x-text="c.snippet"></p>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODE 3: GROUNDING WITH VERTEX AI SEARCH -->
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col space-y-4 hover:border-indigo-500/40 transition">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                                    <i class="fa-solid fa-database"></i>
+                                </span>
+                                <div>
+                                    <h3 class="font-bold text-sm text-slate-200">3. Vertex AI Search Services</h3>
+                                    <span class="text-[10px] text-slate-400" x-text="'Latency: ' + comparisonData.results.vertex_search.latency_ms + 'ms'"></span>
+                                </div>
+                            </div>
+                            <span :class="comparisonData.results.vertex_search.is_mock ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'" class="px-2 py-0.5 rounded text-[10px] border font-mono" x-text="comparisonData.results.vertex_search.is_mock ? 'Mock Mode' : 'Live GCP'"></span>
+                        </div>
+
+                        <!-- Response Text -->
+                        <div class="flex-1 bg-slate-950 p-4 rounded-lg border border-slate-800/80 text-xs text-slate-200 leading-relaxed overflow-y-auto max-h-60 whitespace-pre-line" x-text="comparisonData.results.vertex_search.response_text"></div>
+
+                        <!-- Web Search Queries -->
+                        <div class="space-y-1.5">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Internal Datastore Queries</span>
+                            <div class="space-y-1">
+                                <template x-for="q in comparisonData.results.vertex_search.metadata.web_search_queries" :key="q">
+                                    <div class="bg-slate-950 px-2.5 py-1 rounded text-[11px] font-mono text-indigo-300 border border-slate-800 flex items-center space-x-1.5">
+                                        <i class="fa-solid fa-server text-[9px] text-indigo-400"></i>
+                                        <span x-text="q"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Citations -->
+                        <div class="space-y-1.5">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Retrieved Internal Documents</span>
+                            <div class="space-y-2">
+                                <template x-for="c in comparisonData.results.vertex_search.metadata.citations" :key="c.url">
+                                    <a :href="c.url" target="_blank" class="block bg-slate-950 hover:bg-slate-800/60 p-2.5 rounded border border-slate-800 transition group">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-slate-200 group-hover:text-indigo-400 truncate" x-text="c.title"></span>
+                                            <span class="text-[10px] text-indigo-400 font-mono" x-text="Math.round((c.confidence_score || 0.98)*100) + '%'"></span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 line-clamp-2" x-text="c.snippet"></p>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </template>
+        </div>
+
+        <!-- TAB 2: SINGLE INSPECTOR -->
+        <div x-show="activeTab === 'single'" x-cloak class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-4 bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4">
+                <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Select Grounding Mode</h3>
+                
+                <div class="space-y-2">
+                    <button @click="singleMode = 'web_enterprise'" :class="singleMode === 'web_enterprise' ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'" class="w-full text-left p-3 rounded-lg border transition flex items-center space-x-3">
+                        <i class="fa-solid fa-building-shield text-cyan-400"></i>
+                        <div>
+                            <div class="font-bold text-xs text-slate-200">Web Grounding Enterprise</div>
+                            <div class="text-[10px] text-slate-400">GCP SLA + Audit Compliance</div>
+                        </div>
+                    </button>
+                    <button @click="singleMode = 'google_search'" :class="singleMode === 'google_search' ? 'bg-blue-500/10 border-blue-500/50 text-blue-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'" class="w-full text-left p-3 rounded-lg border transition flex items-center space-x-3">
+                        <i class="fa-brands fa-google text-blue-400"></i>
+                        <div>
+                            <div class="font-bold text-xs text-slate-200">Grounding with Google Search</div>
+                            <div class="text-[10px] text-slate-400">Public Live Web Index</div>
+                        </div>
+                    </button>
+                    <button @click="singleMode = 'vertex_search'" :class="singleMode === 'vertex_search' ? 'bg-indigo-500/10 border-indigo-500/50 text-indigo-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'" class="w-full text-left p-3 rounded-lg border transition flex items-center space-x-3">
+                        <i class="fa-solid fa-database text-indigo-400"></i>
+                        <div>
+                            <div class="font-bold text-xs text-slate-200">Vertex AI Search Services</div>
+                            <div class="text-[10px] text-slate-400">Enterprise Datastore / Search Engine</div>
+                        </div>
+                    </button>
+                </div>
+
+                <button @click="runSingleMode()" :disabled="isLoading" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-lg shadow transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Execute Selected Grounding</span>
+                </button>
+            </div>
+
+            <!-- Result Inspector -->
+            <div class="lg:col-span-8 bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-4">
+                <template x-if="singleResult">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h3 class="font-bold text-lg text-slate-100" x-text="singleResult.mode_title"></h3>
+                            <button @click="copyToClipboard(singleResult.raw_response_json)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded border border-slate-700 flex items-center space-x-1">
+                                <i class="fa-regular fa-copy"></i>
+                                <span>Copy JSON</span>
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs text-slate-200 leading-relaxed font-sans whitespace-pre-line" x-text="singleResult.response_text"></div>
+
+                        <!-- Rendered Search Entry Point Chip -->
+                        <template x-if="singleResult.metadata && singleResult.metadata.search_entry_point_html">
+                            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/80 text-xs text-cyan-400 flex items-center space-x-2" x-html="singleResult.metadata.search_entry_point_html"></div>
+                        </template>
+
+                        <!-- Raw Payload Inspector -->
+                        <div class="space-y-2">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Raw Payload Debugger</span>
+                            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 max-h-48 overflow-auto">
+                                <pre x-text="singleResult.raw_response_json"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- TAB 3: GCP CONFIGURATION -->
+        <div x-show="activeTab === 'config'" x-cloak class="flex-1 bg-slate-900/60 border border-slate-800 rounded-xl p-6 max-w-2xl mx-auto w-full space-y-6">
+            <div>
+                <h2 class="text-xl font-bold text-slate-100">GCP & Vertex AI Configuration</h2>
+                <p class="text-xs text-slate-400">Configure active project IDs, locations, and datastore IDs for live SDK invocation.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">GCP Project ID</label>
+                    <input x-model="config.project_id" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">GCP Location / Region</label>
+                    <input x-model="config.location" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Vertex AI Search Datastore ID</label>
+                    <input x-model="config.datastore_id" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Default Gemini Model</label>
+                    <select x-model="config.model_name" class="w-full bg-slate-950 border border-slate-800 rounded-md p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none">
+                        <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                    </select>
+                </div>
+
+                <button @click="saveConfig()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-lg shadow transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save Settings</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 4: ARCHITECTURE GUIDE -->
+        <div x-show="activeTab === 'architecture'" x-cloak class="flex-1 bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-100">Vertex AI Grounding Architecture Reference</h2>
+                <p class="text-xs text-slate-400">Comparison of Google Cloud Grounding capabilities, SLAs, and integration patterns.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center border border-cyan-500/30 text-lg">
+                        <i class="fa-solid fa-building-shield"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-100 text-sm">GCP Web Grounding Enterprise</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Enterprise-grade web search grounding backed by Google Cloud enterprise DPAs, security SLA, and Cloud Logging audit trails. Ideal for customer-facing enterprise applications requiring formal compliance.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/30 text-lg">
+                        <i class="fa-brands fa-google"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-100 text-sm">Grounding with Google Search</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Connects Gemini models to the public Google Search engine index. Returns web search queries, web source URLs, snippets, and rendered search entry points directly in response metadata.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/30 text-lg">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-100 text-sm">Vertex AI Search Services</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Grounds Gemini models against private unstructured (PDF, HTML, Docs) and structured (BigQuery, SQL) enterprise datastores. Enforces GCP IAM access control with zero public data exposure.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div x-show="showToast" x-cloak x-transition class="fixed bottom-6 right-6 bg-cyan-500 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg shadow-xl flex items-center space-x-2 z-50">
+        <i class="fa-solid fa-circle-info"></i>
+        <span x-text="toastMessage"></span>
+    </div>
+
+</body>
+</html>
+
