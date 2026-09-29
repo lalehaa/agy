@@ -15,9 +15,21 @@ from app.models import (
     ConfigGenerationResponse,
     ValidationRequest,
     ValidationResult,
+    AssistantChatRequest,
+    AssistantChatResponse,
 )
 from app.curriculum import CURRICULUM_MODULES
 from app.validator import validate_config
+
+import sys
+AGY_AGENT_PATH = Path(__file__).resolve().parent.parent.parent.parent / "agy-agent"
+if str(AGY_AGENT_PATH) not in sys.path:
+    sys.path.insert(0, str(AGY_AGENT_PATH))
+
+try:
+    from agy_agent.service import assistant_service
+except Exception:
+    assistant_service = None
 
 router = APIRouter(prefix="/api", tags=["api"])
 
@@ -62,7 +74,9 @@ def update_progress(update: ProgressUpdate) -> UserProgressResponse:
 
 @router.post("/generate/agents", response_model=ConfigGenerationResponse)
 def generate_agents_config(input_data: AgentsConfigInput) -> ConfigGenerationResponse:
-    custom_rules_str = "\n".join([f"- {rule}" for rule in input_data.custom_rules if rule.strip()])
+    custom_rules_str = "\n".join(
+        [f"- {rule}" for rule in input_data.custom_rules if rule.strip()]
+    )
     if custom_rules_str:
         custom_rules_str = f"\n\n## Custom Team Rules\n{custom_rules_str}"
 
@@ -125,3 +139,31 @@ def generate_mcp_config(input_data: MCPConfigInput) -> ConfigGenerationResponse:
 def validate_configuration(request: ValidationRequest) -> ValidationResult:
     return validate_config(request.config_type, request.content)
 
+
+@router.post("/assistant/chat", response_model=AssistantChatResponse)
+def assistant_chat(request: AssistantChatRequest) -> AssistantChatResponse:
+    if not request.message.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Message cannot be empty"
+        )
+
+    if assistant_service:
+        result = assistant_service.answer_query(request.message, request.session_id)
+        return AssistantChatResponse(**result)
+
+    return AssistantChatResponse(
+        response="Antigravity Assistant service is initializing. Please try again shortly.",
+        source="System Fallback",
+    )
+
+
+@router.get("/assistant/suggestions", response_model=List[str])
+def assistant_suggestions() -> List[str]:
+    return [
+        "How does /goal differ from /plan?",
+        "Compare Antigravity with Cursor",
+        "Generate .agents/AGENTS.md config for a 3-agent team",
+        "What are custom skills in AGY and how do I create one?",
+        "What is the /grill-me command and when should I use it?",
+        "Explain the Terminal Sandbox and security permissions in AGY",
+    ]

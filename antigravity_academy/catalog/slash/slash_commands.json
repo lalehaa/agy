@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "catalog_version": "1.0.0",
+  "title": "Google Antigravity (AGY) Slash Commands Catalog",
+  "description": "Comprehensive index of built-in and workflow slash commands available across Google Antigravity ecosystem.",
+  "categories": [
+    "Workflow",
+    "Session & Context",
+    "Model & Reasoning",
+    "Customizations",
+    "Security & Tools",
+    "Configuration",
+    "Integrations",
+    "Utilities"
+  ],
+  "commands": [
+    {
+      "command": "/goal",
+      "category": "Workflow",
+      "aliases": [],
+      "syntax": "/goal <prompt>",
+      "summary": "Run a long-running, autonomous task until complete.",
+      "description": "Instructs the agent to relentlessly iterate, run terminal commands, execute tests, catch failures, and verify requirements until the entire goal is met.",
+      "when_to_use": "Overnight builds, multi-hour refactors, creating 100% test coverage suites.",
+      "example": "/goal Implement full JWT authentication with refresh tokens and verify test suite passes."
+    },
+    {
+      "command": "/plan",
+      "category": "Workflow",
+      "aliases": [],
+      "syntax": "/plan <task>",
+      "summary": "Generate a step-by-step architectural implementation plan before modifying code.",
+      "description": "Breaks down complex, multi-file features into phased milestones with risk analysis and dependency mapping for human review.",
+      "when_to_use": "Complex architectural changes, multi-layer features, or high-risk production code modifications.",
+      "example": "/plan Migrate database schema from SQLite to PostgreSQL with Alembic migrations."
+    },
+    {
+      "command": "/grill-me",
+      "category": "Workflow",
+      "aliases": [],
+      "syntax": "/grill-me [topic]",
+      "summary": "Engage in an interactive Socratic design interview to clarify requirements.",
+      "description": "Proactively questions assumptions, edge cases, error-handling behaviors, and trade-offs before generating code or specs.",
+      "when_to_use": "Ambiguous requirements, API design discussions, or tech stack tradeoffs.",
+      "example": "/grill-me Real-time event streaming pipeline using Redis Streams."
+    },
+    {
+      "command": "/learn",
+      "category": "Workflow",
+      "aliases": [],
+      "syntax": "/learn <pattern or preference>",
+      "summary": "Persist behavioral guidelines or preferences into long-term agent memory.",
+      "description": "Records project conventions, corrections, or setup fixes to ensure consistent agent behavior across all future sessions.",
+      "when_to_use": "When correcting an agent mistake or establishing repository conventions.",
+      "example": "/learn Always run `black` formatting before completing a task and never use global pip packages."
+    },
+    {
+      "command": "/schedule",
+      "category": "Workflow",
+      "aliases": [],
+      "syntax": "/schedule [Cron='<cron>' | DurationSeconds=<secs>] Prompt='<instruction>'",
+      "summary": "Schedule a recurring cron job or one-shot timer for background notifications.",
+      "description": "Creates non-blocking background timers or cron schedules that notify the agent to run recurring tasks or health checks.",
+      "when_to_use": "Monitoring staging deployments, sending delayed reminders, or periodic health checks.",
+      "example": "/schedule Cron='*/15 * * * *' Prompt='Check staging server health and alert on failure'"
+    },
+    {
+      "command": "/diff",
+      "category": "Session & Context",
+      "aliases": [],
+      "syntax": "/diff",
+      "summary": "Open interactive visual diff viewer for modified files.",
+      "description": "Presents side-by-side or inline git diffs allowing code inspection, hunk approval, or rejection.",
+      "when_to_use": "Reviewing code modifications before final acceptance.",
+      "example": "/diff"
+    },
+    {
+      "command": "/compact",
+      "category": "Session & Context",
+      "aliases": [],
+      "syntax": "/compact",
+      "summary": "Condense and summarize conversation context to free token space.",
+      "description": "Compacts earlier conversation turns into a dense summary while retaining critical state and goals.",
+      "when_to_use": "In long-running sessions approaching context window limits.",
+      "example": "/compact"
+    },
+    {
+      "command": "/clear",
+      "category": "Session & Context",
+      "aliases": ["/reset"],
+      "syntax": "/clear",
+      "summary": "Reset current conversation context and start a clean session.",
+      "description": "Clears conversation memory while preserving all workspace files and configurations.",
+      "when_to_use": "Switching to an unrelated task in the same repository.",
+      "example": "/clear"
+    },
+    {
+      "command": "/fork",
+      "category": "Session & Context",
+      "aliases": [],
+      "syntax": "/fork",
+      "summary": "Branch the current conversation trajectory into an isolated fork.",
+      "description": "Clones the conversation history up to the current point, allowing exploration of alternative implementations.",
+      "when_to_use": "Trying out alternative libraries or algorithms without losing prior work.",
+      "example": "/fork"
+    },
+    {
+      "command": "/rename",
+      "category": "Session & Context",
+      "aliases": [],
+      "syntax": "/rename <title>",
+      "summary": "Rename the current conversation session.",
+      "description": "Gives the session a descriptive name for convenient retrieval in project history.",
+      "when_to_use": "Organizing and archiving multi-task sessions.",
+      "example": "/rename auth-jwt-refactor"
+    },
+    {
+      "command": "/statusline",
+      "category": "Session & Context",
+      "aliases": [],
+      "syntax": "/statusline <on|off|enable|disable>",
+      "summary": "Toggle or configure CLI/TUI status line.",
+      "description": "Shows or hides the status line displaying active model, token counter, and workspace status.",
+      "when_to_use": "Customizing terminal workspace UI.",
+      "example": "/statusline on"
+    },
+    {
+      "command": "/exit",
+      "category": "Session & Context",
+      "aliases": ["/quit"],
+      "syntax": "/exit",
+      "summary": "Exit the CLI or TUI session.",
+      "description": "Cleanly closes the interactive agent session (equivalent to Ctrl+D Ctrl+D).",
+      "when_to_use": "Terminating work in terminal mode.",
+      "example": "/exit"
+    },
+    {
+      "command": "/model",
+      "category": "Model & Reasoning",
+      "aliases": [],
+      "syntax": "/model [model_name] [prompt]",
+      "summary": "Switch active LLM or run a prompt with a designated model.",
+      "description": "Selects between Gemini models (Gemini 3.8 Flash, Gemini 3 Pro, Gemini 2.5 Flash Lite) or routes a single prompt to a specific model.",
+      "when_to_use": "Switching between fast prototyping and heavy reasoning models.",
+      "example": "/model gemini-3.8-flash"
+    },
+    {
+      "command": "/effort",
+      "category": "Model & Reasoning",
+      "aliases": [],
+      "syntax": "/effort <low|medium|high|max>",
+      "summary": "Configure reasoning and thinking budget.",
+      "description": "Sets the depth of deliberation and internal chain-of-thought analysis for complex problem-solving.",
+      "when_to_use": "Dialing up effort for difficult algorithmic bugs or down for simple file edits.",
+      "example": "/effort high"
+    },
+    {
+      "command": "/usage",
+      "category": "Model & Reasoning",
+      "aliases": ["/quota"],
+      "syntax": "/usage",
+      "summary": "Display real-time quota, rate limits, and context utilization.",
+      "description": "Shows input/output tokens, cache hits, and remaining quota limits.",
+      "when_to_use": "Monitoring resource usage during heavy pair programming sessions.",
+      "example": "/usage"
+    },
+    {
+      "command": "/credits",
+      "category": "Model & Reasoning",
+      "aliases": [],
+      "syntax": "/credits",
+      "summary": "View Google Cloud / G1 credits and account tier.",
+      "description": "Shows remaining compute credits and tier upgrade options.",
+      "when_to_use": "Checking credit balances and billing status.",
+      "example": "/credits"
+    },
+    {
+      "command": "/skills",
+      "category": "Customizations",
+      "aliases": [],
+      "syntax": "/skills",
+      "summary": "List all active, discovered, and built-in skills.",
+      "description": "Displays available skills from `.agents/skills/`, global configurations, and system defaults.",
+      "when_to_use": "Checking what automated runbooks or skills the agent has access to.",
+      "example": "/skills"
+    },
+    {
+      "command": "/agents",
+      "category": "Customizations",
+      "aliases": [],
+      "syntax": "/agents",
+      "summary": "List available agent personas and subagents.",
+      "description": "Displays team personas (@pm, @coder, @qa) and specialized subagents configured in the project.",
+      "when_to_use": "Selecting or verifying persona configurations in .agents/AGENTS.md.",
+      "example": "/agents"
+    },
+    {
+      "command": "/permissions",
+      "category": "Security & Tools",
+      "aliases": [],
+      "syntax": "/permissions",
+      "summary": "Manage tool permissions, bash approvals, and sandboxing.",
+      "description": "Configures command allowlists, denylists, sandbox isolation, and file access policies.",
+      "when_to_use": "Tightening or loosening terminal auto-execution permissions.",
+      "example": "/permissions"
+    },
+    {
+      "command": "/hooks",
+      "category": "Security & Tools",
+      "aliases": [],
+      "syntax": "/hooks",
+      "summary": "Inspect and manage lifecycle event hooks.",
+      "description": "Configures automated pre-tool command auditing, formatters, and post-execution hooks.",
+      "when_to_use": "Enforcing enterprise compliance and logging on agent actions.",
+      "example": "/hooks"
+    },
+    {
+      "command": "/config",
+      "category": "Configuration",
+      "aliases": ["/settings"],
+      "syntax": "/config",
+      "summary": "Open interactive settings panel.",
+      "description": "Provides a comprehensive UI to adjust global and workspace settings.",
+      "when_to_use": "Modifying agent behavior, theme, or workspace configurations.",
+      "example": "/config"
+    },
+    {
+      "command": "/mcp",
+      "category": "Integrations",
+      "aliases": [],
+      "syntax": "/mcp",
+      "summary": "Manage Model Context Protocol servers and tool integrations.",
+      "description": "Lists, adds, connects, and configures MCP servers (PostgreSQL, GitHub, AlloyDB, etc.).",
+      "when_to_use": "Integrating databases or external API services into agent workflows.",
+      "example": "/mcp"
+    },
+    {
+      "command": "/remote-control",
+      "category": "Utilities",
+      "aliases": [],
+      "syntax": "/remote-control <on|off|status>",
+      "summary": "Manage remote-control background daemon.",
+      "description": "Starts or stops the remote-control daemon for headless CLI or external pairing.",
+      "when_to_use": "Pairing across workstations or managing remote agent daemons.",
+      "example": "/remote-control status"
+    },
+    {
+      "command": "/changelog",
+      "category": "Utilities",
+      "aliases": [],
+      "syntax": "/changelog",
+      "summary": "Show Antigravity release notes and changes.",
+      "description": "Renders latest features, updates, and improvements to Antigravity.",
+      "when_to_use": "Checking for new platform features and updates.",
+      "example": "/changelog"
+    },
+    {
+      "command": "/help",
+      "category": "Utilities",
+      "aliases": [],
+      "syntax": "/help",
+      "summary": "Show available commands and keybindings.",
+      "description": "Displays quick command syntax and keyboard shortcut cheatsheet.",
+      "when_to_use": "Looking up commands or keybindings inside an active session.",
+      "example": "/help"
+    }
+  ]
+}

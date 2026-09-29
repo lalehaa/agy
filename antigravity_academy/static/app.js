@@ -50,9 +50,23 @@ document.addEventListener('alpine:init', () => {
         valContent: `# My AI Development Team\n\n## Product Manager (@pm)\n- Role: Technical specs\n\n## Engineer (@coder)\n- Role: Writes code\n\n## QA (@qa)\n- Role: Tests code`,
         valResult: null,
 
+        // AI Assistant State
+        chatInput: '',
+        chatLoading: false,
+        chatSuggestions: [],
+        chatMessages: [
+            {
+                role: 'assistant',
+                content: 'Hello! I am your Google Antigravity (AGY) Academy AI Assistant powered by Google ADK. Ask me anything about slash commands (/plan, /goal, /grill-me, /schedule), multi-agent teams (@pm, @coder, @qa), competitive comparisons with Cursor and Claude Code, custom skills, or sandbox permissions!',
+                tool_used: 'search_agy_catalog',
+                source: 'Antigravity Master Catalog'
+            }
+        ],
+
         async init() {
             await this.loadCurriculum();
             await this.loadProgress();
+            await this.loadChatSuggestions();
             this.generateConfig();
         },
 
@@ -235,6 +249,106 @@ document.addEventListener('alpine:init', () => {
             } catch (err) {
                 console.error('Validation error:', err);
             }
+        },
+
+        // Assistant Actions
+        async loadChatSuggestions() {
+            try {
+                const res = await fetch('/api/assistant/suggestions');
+                if (res.ok) {
+                    this.chatSuggestions = await res.json();
+                }
+            } catch (err) {
+                console.error('Failed to load chat suggestions:', err);
+            }
+        },
+
+        async sendChatMessage(msgOverride = null) {
+            const text = (msgOverride || this.chatInput).trim();
+            if (!text || this.chatLoading) return;
+
+            this.chatMessages.push({
+                role: 'user',
+                content: text
+            });
+            this.chatInput = '';
+            this.chatLoading = true;
+
+            this.$nextTick(() => {
+                const container = document.getElementById('chat-scroll-container');
+                if (container) container.scrollTop = container.scrollHeight;
+            });
+
+            try {
+                const res = await fetch('/api/assistant/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    this.chatMessages.push({
+                        role: 'assistant',
+                        content: data.response,
+                        tool_used: data.tool_used,
+                        source: data.source
+                    });
+                } else {
+                    this.chatMessages.push({
+                        role: 'assistant',
+                        content: 'Sorry, I encountered an error answering your question. Please try again.',
+                        source: 'Error Handler'
+                    });
+                }
+            } catch (err) {
+                this.chatMessages.push({
+                    role: 'assistant',
+                    content: 'Network connection failed while reaching the agent service.',
+                    source: 'Network Error'
+                });
+            } finally {
+                this.chatLoading = false;
+                this.$nextTick(() => {
+                    const container = document.getElementById('chat-scroll-container');
+                    if (container) container.scrollTop = container.scrollHeight;
+                });
+            }
+        },
+
+        useSuggestion(suggestion) {
+            this.sendChatMessage(suggestion);
+        },
+
+        formatMarkdown(content) {
+            if (!content) return '';
+            // Basic secure markdown rendering for chat
+            let html = content
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            
+            // Code blocks
+            html = html.replace(/```([a-zA-Z]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                return `<pre class="bg-slate-950 p-3 rounded-lg border border-slate-800 my-2 overflow-x-auto text-xs font-mono text-cyan-300"><code>${code.trim()}</code></pre>`;
+            });
+
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code class="bg-slate-800 text-cyan-300 px-1.5 py-0.5 rounded text-xs font-mono">$1</code>');
+
+            // Headers
+            html = html.replace(/^### (.*$)/gim, '<h4 class="font-bold text-slate-100 text-sm mt-3 mb-1">$1</h4>');
+            html = html.replace(/^## (.*$)/gim, '<h3 class="font-bold text-cyan-400 text-base mt-3 mb-1.5">$1</h3>');
+            html = html.replace(/^# (.*$)/gim, '<h2 class="font-bold text-cyan-300 text-lg mt-4 mb-2">$1</h2>');
+
+            // Bold
+            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-slate-100">$1</strong>');
+
+            // Lists
+            html = html.replace(/^\- (.*$)/gim, '<li class="ml-4 list-disc text-slate-300">$1</li>');
+
+            // Line breaks
+            html = html.replace(/\n\n/g, '<br><br>');
+            return html;
         }
     }));
 });

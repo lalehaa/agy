@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "metadata": {
+    "title": "Google Antigravity (AGY) Competitive Feature Parity Matrix",
+    "version": "1.0.0",
+    "last_updated": "2026-09-29",
+    "primary_tool": "Google Antigravity (AGY)",
+    "benchmark_targets": [
+      {
+        "id": "cursor",
+        "name": "Cursor",
+        "vendor": "Anysphere",
+        "archetype": "AI-First IDE Fork"
+      },
+      {
+        "id": "claude_code",
+        "name": "Claude Code",
+        "vendor": "Anthropic",
+        "archetype": "Terminal-First CLI Agent"
+      },
+      {
+        "id": "windsurf",
+        "name": "Windsurf",
+        "vendor": "Codeium",
+        "archetype": "Context-Aware IDE"
+      },
+      {
+        "id": "github_copilot",
+        "name": "GitHub Copilot (Workspace/Edits)",
+        "vendor": "GitHub / Microsoft",
+        "archetype": "Ecosystem Assistive Tool"
+      },
+      {
+        "id": "devin",
+        "name": "Devin",
+        "vendor": "Cognition",
+        "archetype": "Autonomous Cloud Software Engineer"
+      }
+    ],
+    "rating_legend": {
+      "advantage": "Antigravity Advantage: Native capability that outperforms or is absent in competitors",
+      "full_parity": "Full Parity: Competitor provides a comparable native implementation",
+      "partial": "Partial Parity: Competitor supports this with restrictions or manual workarounds",
+      "missing": "Missing: Competitor does not provide this capability natively"
+    }
+  },
+  "dimensions": [
+    {
+      "category_id": "multi_surface",
+      "category_name": "Multi-Surface Ecosystem & Interfaces",
+      "features": [
+        {
+          "id": "cli_client",
+          "name": "Headless CLI Terminal Client",
+          "antigravity_support": "Native 'agy' CLI with interactive REPL, slash commands, and statuslines",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "full_parity",
+            "windsurf": "missing",
+            "github_copilot": "partial",
+            "devin": "missing"
+          },
+          "notes": "Antigravity and Claude Code provide native full-fledged CLI clients. Cursor and Windsurf are IDE-only."
+        },
+        {
+          "id": "standalone_ide",
+          "name": "Dedicated AI-First IDE",
+          "antigravity_support": "Standalone Antigravity IDE with inline code lenses and sidebar chat",
+          "ratings": {
+            "cursor": "full_parity",
+            "claude_code": "missing",
+            "windsurf": "full_parity",
+            "github_copilot": "partial",
+            "devin": "partial"
+          },
+          "notes": "Antigravity, Cursor, and Windsurf feature dedicated IDE distributions based on VS Code."
+        },
+        {
+          "id": "desktop_canvas_2_0",
+          "name": "Visual Desktop Canvas & Auxiliary Pane",
+          "antigravity_support": "Antigravity 2.0 Desktop app with Chat Canvas, Auxiliary Pane for subagents, tasks, and artifacts",
+          "ratings": {
+            "cursor": "partial",
+            "claude_code": "missing",
+            "windsurf": "partial",
+            "github_copilot": "missing",
+            "devin": "partial"
+          },
+          "notes": "Antigravity provides a dedicated multi-pane canvas showing subagents, terminals, and artifacts in real time."
+        },
+        {
+          "id": "programmatic_sdk",
+          "name": "Public Python SDK for Agent Leasing",
+          "antigravity_support": "antigravity-sdk-python for programmatic leasing, custom tool exposure, and headless orchestration",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "missing",
+            "windsurf": "missing",
+            "github_copilot": "missing",
+            "devin": "partial"
+          },
+          "notes": "Devin provides custom enterprise REST APIs. Antigravity provides an open Python SDK."
+        }
+      ]
+    },
+    {
+      "category_id": "workflows_planning",
+      "category_name": "Workflows, Planning & Autonomous Loops",
+      "features": [
+        {
+          "id": "autonomous_goal_execution",
+          "name": "Relentless Autonomous Execution Loop",
+          "antigravity_support": "/goal command executes terminal commands, runs tests, catches errors, and iterates until 100% verified",
+          "ratings": {
+            "cursor": "full_parity",
+            "claude_code": "full_parity",
+            "windsurf": "partial",
+            "github_copilot": "missing",
+            "devin": "full_parity"
+          },
+          "notes": "Cursor Agent mode and Claude Code provide CLI loops; Antigravity adds explicit goal verification gates."
+        },
+        {
+          "id": "architectural_blueprint_gate",
+          "name": "Architectural Plan & Human-in-the-Loop Sign-off",
+          "antigravity_support": "/plan command generates structured markdown specification with interactive Proceed button",
+          "ratings": {
+            "cursor": "partial",
+            "claude_code": "missing",
+            "windsurf": "partial",
+            "github_copilot": "partial",
+            "devin": "partial"
+          },
+          "notes": "Antigravity uniquely separates architectural approval (/plan) from relentless execution (/goal)."
+        },
+        {
+          "id": "socratic_interview",
+          "name": "Socratic Design Interviewing",
+          "antigravity_support": "/grill-me command interrogates requirements using interactive ask_question modal before writing code",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "partial",
+            "windsurf": "missing",
+            "github_copilot": "missing",
+            "devin": "missing"
+          },
+          "notes": "Antigravity provides native structured modal questions; Claude Code relies on standard terminal stdin."
+        },
+        {
+          "id": "background_cron_timers",
+          "name": "Background Cron Schedules & Timers",
+          "antigravity_support": "/schedule tool sets one-shot timers and 5-field recurring cron jobs with early cancel conditions",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "missing",
+            "windsurf": "missing",
+            "github_copilot": "missing",
+            "devin": "partial"
+          },
+          "notes": "Antigravity allows agents to schedule background polling, reminders, and health checks natively."
+        }
+      ]
+    },
+    {
+      "category_id": "multi_agent_orchestration",
+      "category_name": "Multi-Agent Orchestration & Subagents",
+      "features": [
+        {
+          "id": "dynamic_subagents",
+          "name": "Dynamic Subagent Spawning",
+          "antigravity_support": "invoke_subagent and define_subagent spawn child agents with specialized roles, system prompts, and toolsets",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "partial",
+            "windsurf": "missing",
+            "github_copilot": "missing",
+            "devin": "partial"
+          },
+          "notes": "Cursor and Windsurf operate in single-agent context. Antigravity builds dynamic subagent trees."
+        },
+        {
+          "id": "isolated_workspace_branching",
+          "name": "Isolated Workspace Worktrees",
+          "antigravity_support": "Subagents specify Workspace: 'branch' | 'share' | 'inherit' to isolate filesystem changes in git worktrees",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "missing",
+            "windsurf": "missing",
+            "github_copilot": "partial",
+            "devin": "full_parity"
+          },
+          "notes": "Devin isolates via remote Docker containers; Antigravity isolates locally via lightweight git worktrees."
+        },
+        {
+          "id": "team_personas",
+          "name": "Multi-Agent Development Teams",
+          "antigravity_support": ".agents/AGENTS.md defines role separation for @pm, @coder, and @qa personas",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "partial",
+            "windsurf": "missing",
+            "github_copilot": "partial",
+            "devin": "missing"
+          },
+          "notes": "Antigravity natively enforces team persona handoffs across specifications, implementation, and QA audit."
+        }
+      ]
+    },
+    {
+      "category_id": "customization_extensibility",
+      "category_name": "Customizations, Skills & Extensibility",
+      "features": [
+        {
+          "id": "progressive_disclosure_skills",
+          "name": "Modular Progressive Disclosure Skills",
+          "antigravity_support": "SKILL.md standard with YAML metadata, scripts/, examples/, and references/ loaded on-demand",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "partial",
+            "windsurf": "missing",
+            "github_copilot": "missing",
+            "devin": "missing"
+          },
+          "notes": "Competitors use flat rules files which consume tokens on every turn. Antigravity loads skills dynamically."
+        },
+        {
+          "id": "model_context_protocol",
+          "name": "Model Context Protocol (MCP) Integration",
+          "antigravity_support": "Full MCP support with eager tools and lazy tool schema loading on demand",
+          "ratings": {
+            "cursor": "full_parity",
+            "claude_code": "full_parity",
+            "windsurf": "full_parity",
+            "github_copilot": "missing",
+            "devin": "partial"
+          },
+          "notes": "Cursor, Claude Code, and Windsurf support MCP. Antigravity uniquely supports lazy schema loading to conserve context."
+        },
+        {
+          "id": "continuous_memory_learning",
+          "name": "Continuous Rule & Preference Learning",
+          "antigravity_support": "/learn command extracts user feedback and automatically updates persistent memory and rules",
+          "ratings": {
+            "cursor": "partial",
+            "claude_code": "full_parity",
+            "windsurf": "partial",
+            "github_copilot": "missing",
+            "devin": "partial"
+          },
+          "notes": "Claude Code and Antigravity provide native memory persistence mechanisms."
+        }
+      ]
+    },
+    {
+      "category_id": "artifacts_dev_experience",
+      "category_name": "Auxiliary Canvas, Artifacts & Dev Experience",
+      "features": [
+        {
+          "id": "interactive_artifacts",
+          "name": "Interactive Markdown & Mermaid Artifacts",
+          "antigravity_support": "Rendered markdown artifacts with Mermaid diagrams, carousels, and alert callouts stored in brain directory",
+          "ratings": {
+            "cursor": "partial",
+            "claude_code": "missing",
+            "windsurf": "partial",
+            "github_copilot": "missing",
+            "devin": "partial"
+          },
+          "notes": "Antigravity artifacts persist per session and render visual architecture diagrams natively."
+        },
+        {
+          "id": "interactive_questions",
+          "name": "Native Interactive Multiple-Choice Questions",
+          "antigravity_support": "ask_question tool displays interactive UI buttons and checkboxes for user requirement selection",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "missing",
+            "windsurf": "missing",
+            "github_copilot": "missing",
+            "devin": "missing"
+          },
+          "notes": "Unique to Antigravity; prevents back-and-forth ambiguity by rendering interactive selection modals."
+        },
+        {
+          "id": "live_browser_automation",
+          "name": "Built-in Browser Automation & Testing",
+          "antigravity_support": "Integrated browser tools for DOM inspection, screenshot capture, and web interactions",
+          "ratings": {
+            "cursor": "missing",
+            "claude_code": "partial",
+            "windsurf": "missing",
+            "github_copilot": "missing",
+            "devin": "full_parity"
+          },
+          "notes": "Devin runs Chrome in cloud VM; Antigravity provides native local browser automation tools."
+        }
+      ]
+    }
+  ],
+  "competitors_summary": {
+    "cursor": {
+      "verdict": "Premier AI IDE for inline editing; limited in subagent hierarchy, multi-surface workflows, and workspace branching.",
+      "best_for": "Developers who want a seamless drop-in VS Code replacement with inline editing and fast index search."
+    },
+    "claude_code": {
+      "verdict": "High-powered terminal agent; lacks visual auxiliary canvas, rich artifacts, and workspace worktree branching.",
+      "best_for": "Terminal purists and developers working exclusively in remote SSH shells without GUI."
+    },
+    "windsurf": {
+      "verdict": "Strong context flow tracking in editor; lacks open SDK, persona teams, and persistent background scheduling.",
+      "best_for": "Developers seeking proactive IDE suggestions based on active cursor and tab context."
+    },
+    "github_copilot": {
+      "verdict": "Excellent GitHub platform integration; lacks autonomous agentic loops, terminal sandbox execution, and MCP extensibility.",
+      "best_for": "Enterprises prioritizing strict compliance and standard GitHub PR workflows."
+    },
+    "devin": {
+      "verdict": "Powerful cloud VM software engineer; high subscription cost, remote container latency, and limited real-time local pair programming.",
+      "best_for": "Asynchronous background resolution of remote GitHub issues and Jira tickets."
+    }
+  }
+}

@@ -85,36 +85,91 @@ def test_generate_mcp_config():
 
 def test_validate_agents_config():
     valid_content = "# Team Config\n\n## Product Manager (@pm)\n- Role: Specs\n## Engineer (@coder)\n- Role: Code\n## QA (@qa)\n- Role: Testing"
-    res = client.post("/api/validate", json={"config_type": "agents", "content": valid_content})
+    res = client.post(
+        "/api/validate", json={"config_type": "agents", "content": valid_content}
+    )
     assert res.status_code == 200
     assert res.json()["valid"] is True
 
     invalid_content = "Just plain text without headers"
-    res_inv = client.post("/api/validate", json={"config_type": "agents", "content": invalid_content})
+    res_inv = client.post(
+        "/api/validate", json={"config_type": "agents", "content": invalid_content}
+    )
     assert res_inv.status_code == 200
     assert res_inv.json()["valid"] is False
 
 
 def test_validate_skill_config():
     valid_skill = "---\nname: my-skill\ndescription: Test skill\n---\n# Instructions\nDo something."
-    res = client.post("/api/validate", json={"config_type": "skill", "content": valid_skill})
+    res = client.post(
+        "/api/validate", json={"config_type": "skill", "content": valid_skill}
+    )
     assert res.status_code == 200
     assert res.json()["valid"] is True
 
     invalid_skill = "Missing frontmatter"
-    res_inv = client.post("/api/validate", json={"config_type": "skill", "content": invalid_skill})
+    res_inv = client.post(
+        "/api/validate", json={"config_type": "skill", "content": invalid_skill}
+    )
     assert res_inv.status_code == 200
     assert res_inv.json()["valid"] is False
 
 
 def test_validate_mcp_config():
     valid_mcp = '{"mcpServers": {"srv": {"command": "node"}}}'
-    res = client.post("/api/validate", json={"config_type": "mcp", "content": valid_mcp})
+    res = client.post(
+        "/api/validate", json={"config_type": "mcp", "content": valid_mcp}
+    )
     assert res.status_code == 200
     assert res.json()["valid"] is True
 
     invalid_mcp = "{ invalid json }"
-    res_inv = client.post("/api/validate", json={"config_type": "mcp", "content": invalid_mcp})
+    res_inv = client.post(
+        "/api/validate", json={"config_type": "mcp", "content": invalid_mcp}
+    )
     assert res_inv.status_code == 200
     assert res_inv.json()["valid"] is False
 
+
+def test_assistant_suggestions():
+    response = client.get("/api/assistant/suggestions")
+    assert response.status_code == 200
+    suggestions = response.json()
+    assert isinstance(suggestions, list)
+    assert len(suggestions) > 0
+    assert any("goal" in s.lower() for s in suggestions)
+
+
+def test_assistant_chat_slash_command():
+    payload = {"message": "/plan"}
+    response = client.post("/api/assistant/chat", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "response" in data
+    assert "/plan" in data["response"]
+    assert data["tool_used"] == "get_slash_command_manual"
+
+
+def test_assistant_chat_plan_vs_goal():
+    payload = {"message": "How does /plan differ from /goal?"}
+    response = client.post("/api/assistant/chat", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "plan" in data["response"].lower()
+    assert "goal" in data["response"].lower()
+    assert data["tool_used"] == "explain_plan_vs_goal"
+
+
+def test_assistant_chat_competitor():
+    payload = {"message": "Compare Antigravity with Cursor"}
+    response = client.post("/api/assistant/chat", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "cursor" in data["response"].lower()
+    assert data["tool_used"] == "compare_agy_feature"
+
+
+def test_assistant_chat_empty_validation():
+    payload = {"message": "   "}
+    response = client.post("/api/assistant/chat", json=payload)
+    assert response.status_code == 400

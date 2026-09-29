@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 
 
@@ -30,11 +30,17 @@ class UserProgressResponse(BaseModel):
 
 class AgentsConfigInput(BaseModel):
     pm_name: str = "@pm"
-    pm_role: str = "Translates user ideas into granular, flawless technical specifications."
+    pm_role: str = (
+        "Translates user ideas into granular, flawless technical specifications."
+    )
     coder_name: str = "@coder"
-    coder_role: str = "Writes exceptionally clean, production-ready Python or JavaScript code."
+    coder_role: str = (
+        "Writes exceptionally clean, production-ready Python or JavaScript code."
+    )
     qa_name: str = "@qa"
-    qa_role: str = "Reviews generated code, writes test suites, and runs validation loops."
+    qa_role: str = (
+        "Reviews generated code, writes test suites, and runs validation loops."
+    )
     custom_rules: List[str] = Field(default_factory=list)
 
 
@@ -67,3 +73,14 @@ class ValidationResult(BaseModel):
     errors: List[str] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
 
+
+class AssistantChatRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+
+
+class AssistantChatResponse(BaseModel):
+    response: str
+    source: Optional[str] = None
+    tool_used: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None

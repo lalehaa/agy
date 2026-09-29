@@ -52,6 +52,11 @@
                     <i class="fa-solid fa-book-bookmark"></i>
                     <span class="hidden md:inline">Cheat Sheet</span>
                 </button>
+                <button @click="activeTab = 'assistant'" :class="activeTab === 'assistant' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border-transparent'" class="px-3 py-2 rounded-md text-sm font-medium border flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-robot"></i>
+                    <span class="hidden md:inline">AI Assistant</span>
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-500/40">ADK</span>
+                </button>
             </nav>
         </div>
     </header>
@@ -403,6 +408,96 @@
                         <li>Minimize unsandboxed steps; isolate single commands needing bypass.</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: AI ASSISTANT (POWERED BY GOOGLE ADK) -->
+        <div x-show="activeTab === 'assistant'" x-cloak class="flex-1 flex flex-col bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+            <!-- Assistant Header -->
+            <div class="p-4 border-b border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                        <i class="fa-solid fa-robot text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-100 flex items-center space-x-2">
+                            <span>Antigravity Feature Assistant</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-500/30 font-mono">Google ADK Agent</span>
+                        </h2>
+                        <p class="text-xs text-slate-400">Grounded with the Antigravity Master Catalog & Official Documentation</p>
+                    </div>
+                </div>
+
+                <!-- Suggestions / Prompt Pills -->
+                <div class="flex items-center space-x-2 text-xs text-slate-400">
+                    <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i>
+                    <span>Quick Prompts:</span>
+                </div>
+            </div>
+
+            <!-- Quick Suggestions Bar -->
+            <div class="px-4 py-2.5 bg-slate-950/60 border-b border-slate-800/80 flex items-center space-x-2 overflow-x-auto">
+                <template x-for="(sugg, idx) in chatSuggestions" :key="idx">
+                    <button @click="useSuggestion(sugg)" class="whitespace-nowrap px-3 py-1 bg-slate-900 hover:bg-cyan-950/60 text-slate-300 hover:text-cyan-300 border border-slate-800 hover:border-cyan-500/40 rounded-full text-xs transition flex items-center space-x-1.5">
+                        <i class="fa-regular fa-lightbulb text-cyan-400 text-xs"></i>
+                        <span x-text="sugg"></span>
+                    </button>
+                </template>
+            </div>
+
+            <!-- Chat Messages Log -->
+            <div id="chat-scroll-container" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 max-h-[580px]">
+                <template x-for="(msg, idx) in chatMessages" :key="idx">
+                    <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
+                        <div :class="msg.role === 'user' ? 'bg-cyan-600 text-white rounded-2xl rounded-tr-sm max-w-2xl p-4 shadow-lg' : 'bg-slate-900/90 border border-slate-800 text-slate-200 rounded-2xl rounded-tl-sm max-w-3xl p-5 shadow-xl space-y-2'">
+                            <!-- Role & Source Badge -->
+                            <div class="flex items-center justify-between text-xs mb-1 gap-2" :class="msg.role === 'user' ? 'text-cyan-100' : 'text-slate-400'">
+                                <span class="font-bold flex items-center space-x-1.5">
+                                    <i :class="msg.role === 'user' ? 'fa-solid fa-user' : 'fa-solid fa-robot text-cyan-400'"></i>
+                                    <span x-text="msg.role === 'user' ? 'You' : 'AGY Academy Assistant'"></span>
+                                </span>
+                                <template x-if="msg.source">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-slate-950 text-slate-400 border border-slate-800 font-mono">
+                                        <i class="fa-solid fa-book-open mr-1 text-cyan-500"></i>
+                                        <span x-text="msg.source"></span>
+                                    </span>
+                                </template>
+                            </div>
+
+                            <!-- Content with Markdown Render -->
+                            <div class="text-sm leading-relaxed" x-html="formatMarkdown(msg.content)"></div>
+
+                            <!-- Tool Used Badge -->
+                            <template x-if="msg.tool_used">
+                                <div class="pt-2 mt-2 border-t border-slate-800/80 flex items-center space-x-2 text-[11px] text-slate-400 font-mono">
+                                    <i class="fa-solid fa-screwdriver-wrench text-cyan-400"></i>
+                                    <span>Grounded via: <span class="text-cyan-300" x-text="msg.tool_used"></span></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Loading Bubble -->
+                <div x-show="chatLoading" x-cloak class="flex justify-start">
+                    <div class="bg-slate-900 border border-slate-800 text-slate-400 rounded-2xl rounded-tl-sm p-4 flex items-center space-x-3 text-xs">
+                        <i class="fa-solid fa-circle-notch fa-spin text-cyan-400 text-base"></i>
+                        <span>Querying Antigravity Catalog & Official Documentation...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input Box -->
+            <div class="p-4 bg-slate-900/90 border-t border-slate-800">
+                <form @submit.prevent="sendChatMessage()" class="flex items-center space-x-3">
+                    <div class="flex-1 relative">
+                        <input type="text" x-model="chatInput" placeholder="Ask about /plan vs /goal, competitive comparisons, custom skills, sandboxes..." class="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500">
+                    </div>
+                    <button type="submit" :disabled="chatLoading || !chatInput.trim()" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition">
+                        <span>Send</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
             </div>
         </div>
     </main>

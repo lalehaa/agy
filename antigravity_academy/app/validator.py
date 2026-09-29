@@ -24,7 +24,9 @@ def validate_agents_config(content: str) -> ValidationResult:
         errors.append("Document missing Markdown headers (# or ##).")
 
     if "Role:" not in content and "role:" not in content and "- Role" not in content:
-        warnings.append("Consider explicitly adding 'Role:' bullet points for each persona.")
+        warnings.append(
+            "Consider explicitly adding 'Role:' bullet points for each persona."
+        )
 
     valid = len(errors) == 0
     return ValidationResult(valid=valid, errors=errors, warnings=warnings)
@@ -57,9 +59,14 @@ def validate_skill_config(content: str) -> ValidationResult:
         if "name" not in frontmatter or not str(frontmatter["name"]).strip():
             errors.append("Frontmatter missing required field 'name'.")
         elif not re.match(r"^[a-zA-Z0-9_-]+$", str(frontmatter["name"])):
-            errors.append("Skill 'name' should contain only alphanumeric characters, underscores, or hyphens.")
+            errors.append(
+                "Skill 'name' should contain only alphanumeric characters, underscores, or hyphens."
+            )
 
-        if "description" not in frontmatter or not str(frontmatter["description"]).strip():
+        if (
+            "description" not in frontmatter
+            or not str(frontmatter["description"]).strip()
+        ):
             warnings.append("Frontmatter missing recommended field 'description'.")
 
     except yaml.YAMLError as e:
@@ -99,13 +106,19 @@ def validate_mcp_config(content: str) -> ValidationResult:
                 continue
 
             if "command" not in server_cfg or not str(server_cfg["command"]).strip():
-                errors.append(f"Server '{server_name}' missing required 'command' string.")
+                errors.append(
+                    f"Server '{server_name}' missing required 'command' string."
+                )
 
             if "args" in server_cfg and not isinstance(server_cfg["args"], list):
-                warnings.append(f"Server '{server_name}' field 'args' should be an array of strings.")
+                warnings.append(
+                    f"Server '{server_name}' field 'args' should be an array of strings."
+                )
 
             if "env" in server_cfg and not isinstance(server_cfg["env"], dict):
-                warnings.append(f"Server '{server_name}' field 'env' should be an object/dictionary.")
+                warnings.append(
+                    f"Server '{server_name}' field 'env' should be an object/dictionary."
+                )
 
     except json.JSONDecodeError as e:
         errors.append(f"Invalid JSON format: {str(e)}")
@@ -124,6 +137,7 @@ def validate_config(config_type: str, content: str) -> ValidationResult:
     else:
         return ValidationResult(
             valid=False,
-            errors=[f"Unsupported config type '{config_type}'. Expected 'agents', 'skill', or 'mcp'."],
+            errors=[
+                f"Unsupported config type '{config_type}'. Expected 'agents', 'skill', or 'mcp'."
+            ],
         )
-
