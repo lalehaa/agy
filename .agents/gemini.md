@@ -20,6 +20,7 @@
 - DO NOT use deprecated legacy endpoints.
 - DO NOT hardcode API credentials or environment secrets. Use `os.getenv()` exclusively.
 - If an operation requires a database migration, you must explicitly flag it to the user and wait for human confirmation before running the script.
+- **CRITICAL - Cloud Run Deployment Security Guardrail**: Under NO circumstances should any Cloud Run service be deployed with unauthenticated access. You are strictly forbidden from executing, proposing, or generating deployment commands containing `--allow-unauthenticated` or granting `roles/run.invoker` to `allUsers`. All Cloud Run deployments MUST explicitly enforce IAM authentication using `--no-allow-unauthenticated`. If an unauthenticated deployment is requested, you must immediately REFUSE the request and state that it violates the strict security rule.
 
 ## Workspace Architecture & Project Creation
 - **New Applications Only**: Whenever you are instructed to create a completely new application (as opposed to editing or refactoring an existing application layout), you must immediately generate a dedicated root folder for it inside the current workspace directory.

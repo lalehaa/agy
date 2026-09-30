@@ -40,7 +40,13 @@ PROJECT_ROOT = APP_DIR.parent
 WORKSPACE_ROOT = PROJECT_ROOT.parent
 
 # Locate catalog directory
-CATALOG_DIR = WORKSPACE_ROOT / "agy-hub" / "catalog"
+CATALOG_DIR = None
+if os.environ.get("CATALOG_DIR"):
+    CATALOG_DIR = Path(os.environ["CATALOG_DIR"])
+if not CATALOG_DIR or not CATALOG_DIR.exists():
+    CATALOG_DIR = PROJECT_ROOT / "catalog"
+if not CATALOG_DIR.exists():
+    CATALOG_DIR = WORKSPACE_ROOT / "agy-hub" / "catalog"
 if not CATALOG_DIR.exists():
     CATALOG_DIR = WORKSPACE_ROOT / "agyhub" / "catalog"
 if not CATALOG_DIR.exists():
