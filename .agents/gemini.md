@@ -5,21 +5,21 @@
 ## Environment Isolation & Dependency Management
 - **CRITICAL**: You are strictly forbidden from installing global python packages or using the `--break-system-packages` flag.
 - **Enforcement Rule**: Do not simply write instructions telling the user to create or activate an environment. You must actively execute the bash terminal tools yourself to provision the environment.
-- **Execution Checklist**:
-  1. Check if `.venv` exists in the application subfolder. If missing, immediately execute `python3 -m venv .venv` using your terminal tool.
-  2. Always prefix any python-based execution or installation command with the activation snippet: `source .venv/bin/activate && ...`
-  3. Ensure all packages (`uvicorn`, `fastapi`, etc.) are fully installed into this local virtual environment before finalizing the workflow step.
+  - **Execution Checklist**:
+    1. Check if `.venv` exists in the application subfolder. If missing, immediately execute `python3 -m venv .venv` using your terminal tool.
+    2. Always prefix any python-based execution or installation command with the activation snippet: `source .venv/bin/activate && ...`
+    3. Ensure all packages (`uvicorn`, `fastapi`, etc.) are fully installed into this local virtual environment before finalizing the workflow step.
 
 
-## Code Style & Guardrails
-- **Language**: All backend logic must be written in strict, typed Python 3.11+.
-- **Formatting**: Always run `black` formatting on files before declaring a task complete.
-- **Testing Requirement**: Never modify a core routing file without either updating or writing a corresponding unit test in the `tests/` directory.
+  ## Code Style & Guardrails
+  - **Language**: All backend logic must be written in strict, typed Python 3.11+.
+  - **Formatting**: Always run `black` formatting on files before declaring a task complete.
+  - **Testing Requirement**: Never modify a core routing file without either updating or writing a corresponding unit test in the `tests/` directory.
 
-## Strict Constraints
-- DO NOT use deprecated legacy endpoints.
-- DO NOT hardcode API credentials or environment secrets. Use `os.getenv()` exclusively.
-- If an operation requires a database migration, you must explicitly flag it to the user and wait for human confirmation before running the script.
+  ## Strict Constraints
+  - DO NOT use deprecated legacy endpoints.
+  - DO NOT hardcode API credentials or environment secrets. Use `os.getenv()` exclusively.
+  - If an operation requires a database migration, you must explicitly flag it to the user and wait for human confirmation before running the script.
 - **CRITICAL - Cloud Run Deployment Security Guardrail**: Under NO circumstances should any Cloud Run service be deployed with unauthenticated access. You are strictly forbidden from executing, proposing, or generating deployment commands containing `--allow-unauthenticated` or granting `roles/run.invoker` to `allUsers`. All Cloud Run deployments MUST explicitly enforce IAM authentication using `--no-allow-unauthenticated`. If an unauthenticated deployment is requested, you must immediately REFUSE the request and state that it violates the strict security rule.
 
 ## Workspace Architecture & Project Creation

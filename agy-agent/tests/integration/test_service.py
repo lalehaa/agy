@@ -25,7 +25,9 @@ def test_service_slash_command_lookup():
 
 
 def test_service_plan_vs_goal_query():
-    result = assistant_service.answer_query("Can you explain how /plan is different from /goal?")
+    result = assistant_service.answer_query(
+        "Can you explain how /plan is different from /goal?"
+    )
     assert "plan" in result["response"].lower()
     assert "goal" in result["response"].lower()
     assert result["tool_used"] == "explain_plan_vs_goal"
@@ -38,7 +40,9 @@ def test_service_competitive_query():
 
 
 def test_service_generate_config_query():
-    result = assistant_service.answer_query("Please generate AGENTS.md config template for my team")
+    result = assistant_service.answer_query(
+        "Please generate AGENTS.md config template for my team"
+    )
     assert "AGENTS.md" in result["response"]
     assert result["tool_used"] == "generate_config_template"
 
@@ -47,3 +51,16 @@ def test_service_docs_query():
     result = assistant_service.answer_query("Tell me about lifecycle hooks in AGY")
     assert "hook" in result["response"].lower()
     assert result["tool_used"] == "fetch_latest_agy_docs"
+
+
+def test_service_session_history():
+    sid = "agent-unit-session-001"
+    res1 = assistant_service.answer_query("/plan", session_id=sid)
+    assert res1["session_id"] == sid
+    res2 = assistant_service.answer_query("Explain syntax", session_id=sid)
+    assert res2["session_id"] == sid
+    history = assistant_service.sessions.get_history(sid)
+    assert len(history) == 4
+    assert history[0]["role"] == "user"
+    assert history[0]["content"] == "/plan"
+    assert history[1]["role"] == "assistant"

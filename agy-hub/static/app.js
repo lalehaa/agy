@@ -53,6 +53,7 @@ document.addEventListener('alpine:init', () => {
         // AI Assistant State
         chatInput: '',
         chatLoading: false,
+        chatSessionId: 'sess_' + Math.random().toString(36).substring(2, 11),
         chatSuggestions: [],
         chatMessages: [
             {
@@ -283,7 +284,10 @@ document.addEventListener('alpine:init', () => {
                 const res = await fetch('/api/assistant/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
+                    body: JSON.stringify({
+                        message: text,
+                        session_id: this.chatSessionId
+                    })
                 });
                 if (res.ok) {
                     const data = await res.json();

@@ -5,6 +5,8 @@ description: Takes an app idea, generates a spec, writes the code, and passes it
 
 # Multi-Agent Factory Workflow
 
+Use this skill when the user runs `/startcycle` or wants an autonomous multi-agent development cycle (@pm -> @coder -> @qa).
+
 ### Step 1: Requirements Architecture
 Call @pm to analyze the user's input idea. Generate a comprehensive `technical_spec.md` file in the root folder. Stop and wait for user approval.
 

@@ -54,7 +54,9 @@ try:
             os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
         if not os.environ.get("GOOGLE_CLOUD_LOCATION"):
             os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
-        if not os.environ.get("GOOGLE_GENAI_USE_VERTEXAI") and not os.environ.get("GOOGLE_API_KEY"):
+        if not os.environ.get("GOOGLE_GENAI_USE_VERTEXAI") and not os.environ.get(
+            "GOOGLE_API_KEY"
+        ):
             os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
     except (DefaultCredentialsError, Exception):
         # Default credentials not available, fallback to API key or offline mode

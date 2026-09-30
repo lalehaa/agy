@@ -39,22 +39,30 @@ APP_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = APP_DIR.parent
 WORKSPACE_ROOT = PROJECT_ROOT.parent
 
-# Locate catalog directory
-CATALOG_DIR = None
-if os.environ.get("CATALOG_DIR"):
-    CATALOG_DIR = Path(os.environ["CATALOG_DIR"])
-if not CATALOG_DIR or not CATALOG_DIR.exists():
-    CATALOG_DIR = PROJECT_ROOT / "catalog"
-if not CATALOG_DIR.exists():
-    CATALOG_DIR = WORKSPACE_ROOT / "agy-hub" / "catalog"
-if not CATALOG_DIR.exists():
-    CATALOG_DIR = WORKSPACE_ROOT / "agyhub" / "catalog"
-if not CATALOG_DIR.exists():
-    CATALOG_DIR = WORKSPACE_ROOT / "agy_acadamy" / "catalog"
-if not CATALOG_DIR.exists():
-    CATALOG_DIR = WORKSPACE_ROOT / "antigravity_academy" / "catalog"
-if not CATALOG_DIR.exists():
-    CATALOG_DIR = WORKSPACE_ROOT / "catalog"
+
+def resolve_catalog_dir() -> Path:
+    """Deterministically resolves the Antigravity Master Catalog directory."""
+    if os.environ.get("CATALOG_DIR"):
+        env_dir = Path(os.environ["CATALOG_DIR"]).resolve()
+        if env_dir.exists():
+            return env_dir
+
+    candidates = [
+        PROJECT_ROOT / "catalog",
+        WORKSPACE_ROOT / "catalog",
+        WORKSPACE_ROOT / "agy-hub" / "catalog",
+        WORKSPACE_ROOT / "antigravity_academy" / "catalog",
+        Path("/catalog"),
+        Path("/app/catalog"),
+    ]
+    for c in candidates:
+        if c.exists():
+            return c.resolve()
+
+    return (WORKSPACE_ROOT / "agy-hub" / "catalog").resolve()
+
+
+CATALOG_DIR = resolve_catalog_dir()
 
 # Built-in skills reference directory
 BUILTIN_GUIDE_DIR = Path(
@@ -66,7 +74,7 @@ class AGYKnowledgeBase:
     """In-memory index and search engine for Antigravity knowledge."""
 
     def __init__(self, catalog_dir: Optional[Path] = None) -> None:
-        self.catalog_dir = catalog_dir or CATALOG_DIR
+        self.catalog_dir = catalog_dir or resolve_catalog_dir()
         self.slash_commands: Dict[str, Dict[str, Any]] = {}
         self.competitive_matrix: Dict[str, Any] = {}
         self.plan_vs_goal_doc: str = ""

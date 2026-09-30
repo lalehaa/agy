@@ -179,3 +179,47 @@ def test_assistant_service_loaded():
     from app.routers.api import assistant_service
 
     assert assistant_service is not None
+
+
+def test_assistant_chat_session_history():
+    session_id = "test-session-123"
+    # Turn 1
+    res1 = client.post(
+        "/api/assistant/chat",
+        json={"message": "/plan", "session_id": session_id},
+    )
+    assert res1.status_code == 200
+    data1 = res1.json()
+    assert data1["session_id"] == session_id
+
+    # Turn 2: Follow-up query in same session
+    res2 = client.post(
+        "/api/assistant/chat",
+        json={"message": "Can you give me an example?", "session_id": session_id},
+    )
+    assert res2.status_code == 200
+    data2 = res2.json()
+    assert data2["session_id"] == session_id
+
+    from app.routers.api import assistant_service
+
+    history = assistant_service.sessions.get_history(session_id)
+    assert len(history) >= 4  # 2 user messages + 2 assistant responses
+
+
+def test_assistant_chat_config_generation():
+    payload = {"message": "Generate AGENTS.md configuration blueprint for team"}
+    response = client.post("/api/assistant/chat", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "AGENTS.md" in data["response"]
+    assert data["tool_used"] == "generate_config_template"
+
+
+def test_assistant_chat_docs():
+    payload = {"message": "Tell me about lifecycle hooks in AGY"}
+    response = client.post("/api/assistant/chat", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "hook" in data["response"].lower()
+    assert data["tool_used"] == "fetch_latest_agy_docs"

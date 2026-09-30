@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import yaml
 from pathlib import Path
 from typing import List, Dict
@@ -21,19 +22,27 @@ from app.models import (
 from app.curriculum import CURRICULUM_MODULES
 from app.validator import validate_config
 
-import sys
+# Setup paths to reliably locate agy_agent whether running locally or containerized
+CURRENT_DIR = Path(__file__).resolve().parent
+AGY_HUB_ROOT = CURRENT_DIR.parent.parent
+WORKSPACE_ROOT = AGY_HUB_ROOT.parent
 
-AGY_AGENT_PATH = Path(__file__).resolve().parent.parent.parent.parent / "agy-agent"
-if str(AGY_AGENT_PATH) not in sys.path:
-    sys.path.insert(0, str(AGY_AGENT_PATH))
-ACADEMY_PATH = Path(__file__).resolve().parent.parent.parent
-if str(ACADEMY_PATH) not in sys.path:
-    sys.path.insert(0, str(ACADEMY_PATH))
+for candidate_path in [
+    AGY_HUB_ROOT,
+    WORKSPACE_ROOT / "agy-agent",
+    WORKSPACE_ROOT / "agy-hub",
+]:
+    p_str = str(candidate_path)
+    if candidate_path.exists() and p_str not in sys.path:
+        sys.path.insert(0, p_str)
 
 try:
     from agy_agent.service import assistant_service
 except Exception:
-    assistant_service = None
+    try:
+        from app.service import assistant_service
+    except Exception:
+        assistant_service = None
 
 router = APIRouter(prefix="/api", tags=["api"])
 
@@ -158,6 +167,7 @@ def assistant_chat(request: AssistantChatRequest) -> AssistantChatResponse:
     return AssistantChatResponse(
         response="Antigravity Assistant service is initializing. Please try again shortly.",
         source="System Fallback",
+        session_id=request.session_id,
     )
 
 

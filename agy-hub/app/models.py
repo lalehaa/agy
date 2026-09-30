@@ -83,4 +83,5 @@ class AssistantChatResponse(BaseModel):
     response: str
     source: Optional[str] = None
     tool_used: Optional[str] = None
+    session_id: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None

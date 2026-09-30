@@ -14,6 +14,7 @@
 
 try:
     from .agent import app
+
     __all__ = ["app"]
 except ImportError:
     __all__ = []
